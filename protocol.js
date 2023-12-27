@@ -10,17 +10,14 @@ const io = new Server(server);
 
 // app.use(cors({ origin: "*" }));
 
-app.get('/', (_, res) => {
-    res.send('dev protocol for inj');
-});
 
 const logger = (message) => console.log(`[${new Date().toLocaleTimeString()}] ${message}`); 
 let clients = new Set();
+let currentBlock = null;
 
 new Promise(async () => {
     const endpoint = "https://injective-rpc.cosmos-apis.com";
     const maxBlocksDistance = 5;
-    let currentBlock = null;
 
 	while (true) {
 		await new Promise(resolveTimeout => setTimeout(resolveTimeout, 1000));
@@ -78,6 +75,10 @@ new Promise(async () => {
 			blockNumber++;
 		}
 	}
+});
+
+app.get('/', (_, res) => {
+    res.send(`dev protocol for inj, latestHeigth: ${currentBlock}`);
 });
 
 io.on('connection', (socket) => {
