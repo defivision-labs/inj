@@ -19,6 +19,7 @@ let clients = new Set();
 
 new Promise(async () => {
     const endpoint = "https://injective-rpc.cosmos-apis.com";
+    const maxBlocksDistance = 5;
     let currentBlock = null;
 
 	while (true) {
@@ -26,16 +27,24 @@ new Promise(async () => {
 		const latestBlock = await axios.get(endpoint + "/block").then((res) => res.data).catch(_ => null);
 		const latestBlockNumber = Number(latestBlock?.result?.block?.header?.height);
 
-		if (isNaN(latestBlockNumber)) continue;
+        if (isNaN(latestBlockNumber)) continue;
 		if (!currentBlock) {
 			currentBlock = latestBlockNumber;
-		}
-		if (currentBlock >= latestBlockNumber) continue;
+        }
+
+        if (currentBlock >= latestBlockNumber) continue;
 
         clients.forEach(async (client) => client.send('blockLatest', JSON.stringify(latestBlock)));
+        logger(`Syncing ${latestBlockNumber - currentBlock} block(s)`);
+
+        if (latestBlockNumber - currentBlock > maxBlocksDistance) {
+            logger(`Syncing droped! Syncing distance too long`);
+            currentBlock = latestBlockNumber;
+            continue;
+        }
 
         for (let blockNumber = currentBlock + 1; blockNumber <= latestBlockNumber;){
-            logger(`Fetch latest block: ${blockNumber}`)
+            logger(`Syncing: ${blockNumber}`)
             const blockData = blockNumber !== latestBlockNumber
                 ? await axios.get(endpoint + `/block?height=${blockNumber}`)
                     .then((res) => res.data.result)
@@ -43,7 +52,7 @@ new Promise(async () => {
                 : latestBlock.result;
             
             if (!blockData) {
-                logger(`Request blockData for height=${blockNumber} failed`);
+                logger(`Syncing blockData for height=${blockNumber} failed`);
                 break;
             };
 
@@ -59,7 +68,7 @@ new Promise(async () => {
                 .catch(_ => null)
 
             if (!blockResults || !blockResults.txs_results) {
-                logger(`Request blockResults for height=${blockNumber} failed`);
+                logger(`Syncing blockResults for height=${blockNumber} failed`);
                 break;
             };
 
