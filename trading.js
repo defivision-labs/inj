@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
 console.log('started');
-const socket = io('http://localhost:3000');
+const socket = io('http://inj.defivision.io');
 
 socket.on('connect', () => {
 	console.log('connected')

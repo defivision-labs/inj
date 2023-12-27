@@ -8,7 +8,7 @@ const app = express();
 const server = createServer(app); 
 const io = new Server(server);
 
-app.use(cors({ origin: "*" }));
+// app.use(cors({ origin: "*" }));
 
 app.get('/', (_, res) => {
     res.send('dev protocol for inj');
@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 8023;
-server.listen(8023, () => {
+const PORT = 8001;
+server.listen(PORT, () => {
     logger('listening on *:' + PORT);
 });
