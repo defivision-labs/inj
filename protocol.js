@@ -28,7 +28,6 @@ new Promise(async () => {
 		if (!currentBlock) {
 			currentBlock = latestBlockNumber;
         }
-
         if (currentBlock >= latestBlockNumber) continue;
 
         clients.forEach(async (client) => client.send('blockLatest', JSON.stringify(latestBlock)));
@@ -66,10 +65,9 @@ new Promise(async () => {
 
             if (!blockResults || !blockResults.txs_results) {
                 logger(`Syncing blockResults for height=${blockNumber} failed`);
-                break;
-            };
-
-            clients.forEach(async (client) => client.send('blockResult', JSON.stringify(blockResults)));
+            } else {
+                clients.forEach(async (client) => client.send('blockResult', JSON.stringify(blockResults)));
+            }
 
 			currentBlock = blockNumber;
 			blockNumber++;
